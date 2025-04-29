@@ -16,16 +16,7 @@ try {
     const fileData = fs.readFileSync(bucketsFilePath, 'utf8');
     buckets = JSON.parse(fileData);
   } else {
-    buckets = [
-      {
-        name: 'mycdn-bucket',
-        publicUrl: 'https://pub-d9ad434a36f24cb898d62897a0bc5abe.r2.dev',
-      },
-      {
-        name: 'ridowww',
-        publicUrl: 'https://pub-bc61fbac62354eb0ab060dcb2a1b7d4c.r2.dev',
-      },
-    ];
+   
     fs.writeFileSync(bucketsFilePath, JSON.stringify(buckets, null, 2), 'utf8');
   }
 } catch (err) {
