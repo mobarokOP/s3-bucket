@@ -34,10 +34,10 @@ try {
 
 // AWS S3 setup with v3 SDK
 const s3Client = new S3Client({
-  endpoint: process.env.R2_ENDPOINT || 'https://660d6ba11c5892f0d16216ac7ee0ef6f.r2.cloudflarestorage.com',
+  endpoint: process.env.R2_ENDPOINT || 'https://c731cdfdb6f8fc3382a939acdedf3692.r2.cloudflarestorage.com',
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '7e70e18a42b31d87b0230139592c6f0e',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '55c39bd092d38907d0d4db74afe6a56bb1b08470929cb68df9e920c6023c5a8f',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '33a8537238bb4598707729e04216d880',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || 'b0cb22f05f320afd7f28ad5d6a7d33463a1cc7a043a41880b652495358fa2222',
   },
   region: 'auto',
 });
