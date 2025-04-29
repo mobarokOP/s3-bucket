@@ -1,0 +1,17 @@
+{
+    "name": "bucket-manager",
+    "version": "1.0.0",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": ["bucket", "s3", "express", "node"],
+    "author": "Your Name",
+    "license": "ISC",
+    "description": "A Node.js application to manage S3 buckets and their contents",
+    "dependencies": {
+      "express": "^4.19.2",
+      "@aws-sdk/client-s3": "^3.645.0"
+    }
+  }
