@@ -9,14 +9,14 @@ const port = 3000;
 // Path to the JSON file for persistent storage
 const bucketsFilePath = path.join(__dirname, 'buckets.json');
 
-// Load buckets from file or use default if file doesn’t exist
+// Load buckets from file or initialize empty array if file doesn’t exist
 let buckets = [];
 try {
   if (fs.existsSync(bucketsFilePath)) {
     const fileData = fs.readFileSync(bucketsFilePath, 'utf8');
     buckets = JSON.parse(fileData);
   } else {
-   
+    buckets = [];
     fs.writeFileSync(bucketsFilePath, JSON.stringify(buckets, null, 2), 'utf8');
   }
 } catch (err) {
@@ -152,7 +152,31 @@ const cssStyles = `
   }
 `;
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  // Validate bucket existence in R2
+  const validBuckets = [];
+  for (const bucket of buckets) {
+    try {
+      const command = new ListObjectsV2Command({ Bucket: bucket.name });
+      await s3Client.send(command);
+      validBuckets.push(bucket);
+    } catch (err) {
+      console.error(`Bucket ${bucket.name} no longer exists:`, err);
+      // Skip buckets that don't exist (e.g., deleted in R2)
+    }
+  }
+
+  // Update buckets array and file if any were removed
+  if (validBuckets.length !== buckets.length) {
+    buckets = validBuckets;
+    try {
+      fs.writeFileSync(bucketsFilePath, JSON.stringify(buckets, null, 2), 'utf8');
+      console.log('Updated buckets.json with valid buckets');
+    } catch (err) {
+      console.error('Error saving updated buckets to file:', err);
+    }
+  }
+
   const bucketListHtml = buckets.map(bucket => `
     <li>
       <a href="/bucket/${encodeURIComponent(bucket.name)}">${bucket.name}</a>
@@ -188,10 +212,9 @@ app.get('/', (req, res) => {
   `);
 });
 
-
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded data
 
-  app.post('/add-bucket', (req, res) => {
+app.post('/add-bucket', (req, res) => {
   const { name, publicUrl } = req.body;
 
   // Validate input
@@ -258,12 +281,12 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
         <h3>Bucket added successfully!</h3>
         <p><a href="/">Go back to the home page</a></p>
       </div>
-      </body>
-      </html>
-    `);
+    </body>
+    </html>
+  `);
 });
 
-  app.get('/bucket/:bucketName', async (req, res) => {
+app.get('/bucket/:bucketName', async (req, res) => {
   const bucketName = req.params.bucketName;
   const bucketConfig = buckets.find(b => b.name === bucketName);
 
@@ -350,7 +373,7 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
   `);
 });
 
-  app.get('/download/:bucketName/:key', async (req, res) => {
+app.get('/download/:bucketName/:key', async (req, res) => {
   const bucketName = req.params.bucketName;
   const fileKey = decodeURIComponent(req.params.key);
 
@@ -390,6 +413,6 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
   }
 });
 
-  app.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
